@@ -2,5 +2,5 @@
 
 ### Things this should accomplish
 
-- [ ] VPC(s)
-- [ ] Subnet(s)
+- [X] VPC(s)
+- [X] Subnet(s)
