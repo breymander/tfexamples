@@ -22,7 +22,7 @@ resource "aws_internet_gateway" "tf_gateway" {
 }
 
 # VPC interweb access
-resource "aws_route" "internet_access" {
+resource "aws_route" "tf_internet_access" {
   route_table_id         = "${aws_vpc.tf_vpc.main_route_table_id}"
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = "${aws_internet_gateway.tf_gateway.id}"
@@ -41,6 +41,13 @@ resource "aws_security_group" "tf_sg_elb" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 resource "aws_security_group" "tf_vpc_sg" {
@@ -53,7 +60,22 @@ resource "aws_security_group" "tf_vpc_sg" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
+    cidr_blocks = ["10.10.11.0/24"]
+  }
+
+  # SSH access from anywhere
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
@@ -72,14 +94,18 @@ resource "aws_elb" "tf_elb_frontend" {
   }
 }
 
+resource "aws_key_pair" "tf_auth" {
+  key_name   = "${var.key_name}"
+  public_key = "${file(var.public_key_path)}"
+}
+
 resource "aws_instance" "tf_frontend" {
   # The connection block tells our provisioner how to
   # communicate with the resource (instance)
   connection {
     # The default username for our AMI
     user = "ubuntu"
-
-    # The connection will use the local SSH agent for authentication.
+    agent = true
   }
 
   instance_type = "t2.micro"
@@ -87,6 +113,9 @@ resource "aws_instance" "tf_frontend" {
   # Lookup the correct AMI based on the region
   # we specified
   ami = "${lookup(var.aws_amis, var.aws_region)}"
+
+  # The name of our SSH keypair we created above.
+  key_name = "${aws_key_pair.tf_auth.id}"
 
   # Our Security group to allow HTTP and SSH access
   vpc_security_group_ids = ["${aws_security_group.tf_vpc_sg.id}"]
@@ -105,5 +134,9 @@ resource "aws_instance" "tf_frontend" {
       "sudo apt-get -y install nginx",
       "sudo service nginx start",
     ]
+  }
+
+  tags {
+    Name = "TF Frontend"
   }
 }
