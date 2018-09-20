@@ -9,3 +9,4 @@
 - [X] Security Group
 - [X] Key Pairs
 - [x] EC2 Instance
+- [x] Provisioner
