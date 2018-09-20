@@ -1,9 +1,7 @@
-# TerraForm basic examples
+# This is an example of implementing basic AWS components
 
-## What is included (currently)
+### Things this should accomplish
 
-### AWS 
-#### InfraBasics
 - [X] VPC(s)
 - [X] Subnet(s)
 - [X] Internet Gateway
