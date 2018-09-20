@@ -2,4 +2,12 @@
 
 ## What is included (currently)
 
-Nothing! This is the inital commit to master.
+### AWS 
+#### InfraBasics
+- [X] VPC(s)
+- [X] Subnet(s)
+- [X] Internet Gateway
+- [X] ELB
+- [X] Security Group
+- [X] Key Pairs
+- [x] EC2 Instance
